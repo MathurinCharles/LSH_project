@@ -50,7 +50,7 @@ void readDocuments(char* argv[]) {
 
 void writeSimilarity() {
     //write on the screen the Jaccard similarity from the caracteristic matrix.
-    printf("---------------------------------------------------------\n");
+    // printf("---------------------------------------------------------\n");
     double x = 0.0;
     double y = 0.0;
     for (int i = 0; i < CM[0].size(); i++) {
@@ -63,7 +63,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
 }
