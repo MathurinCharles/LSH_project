@@ -38,26 +38,81 @@ void Characteristic_Matrix::generateKShingles() {
     //Generate the k-shingles of the two documents
     kshings = vector<vector<string> > (ndocs);
 
-    for (int index=0; index<ndocs; index++){
-        vector<char> kshingle(k);
+    cl::Buffer doc;                        // device memory used for the input  document vector
+    cl::Buffer shingles;                       // device memory used for the output shingles vector
 
-        for (int i = 0; i < k; i++) {
-            kshingle[i] = docs[index][i];
+    try
+    {
+        cl_uint deviceIndex = 0;
+        // parseArguments(argc, argv, &deviceIndex);
+        // Get list of devices
+        std::vector<cl::Device> devices;
+        unsigned numDevices = getDeviceList(devices);
+        // Check device index in range
+        if (deviceIndex >= numDevices)
+        {
+            std::cout << "Invalid device index (try '--list')\n";
+            throw 1;
         }
+        cl::Device device = devices[deviceIndex];
 
-        string srt(kshingle.begin(), kshingle.end());
-        kshings[index].push_back(srt);
+        std::string name;
+        getDeviceName(device, name);
+        std::cout << "\nUsing OpenCL device: " << name << "\n";
 
-        for (int i = k; i < docs[index].size(); i++) {
-            kshingle.erase(kshingle.begin());
-            kshingle.push_back(docs[index][i]);
-            string srt(kshingle.begin(), kshingle.end());
-            kshings[index].push_back(srt);
+        std::vector<cl::Device> chosen_device;
+        chosen_device.push_back(device);
+        cl::Context context(chosen_device);
+
+        // Load in kernel source, creating a program object for the context
+        std::cout << 1 << std::endl;
+        cl::Program program(context, util::loadProgram("src/generate_shingles.cl"), true);
+        std::cout << 2 << std::endl;
+        // Get the command queue
+        cl::CommandQueue queue(context);
+
+        // Create the kernel functor
+        auto generate_shingles = cl::make_kernel<cl::Buffer, cl::Buffer, int>(program, "generate_shingles");
+
+        for (int index=0; index<ndocs; index++){
+            unsigned int n = docs[index].size();
+            doc = cl::Buffer(context, begin(docs[index]), end(docs[index]), true);
+            shingles = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(char)*k*(n-(k-1)));
+            std::cout << index << std::endl;
+            generate_shingles(cl::EnqueueArgs(queue, cl::NDRange(n-(k-1))), doc, shingles,k);
+            printf("reussi");
+            queue.finish();
+            cl::copy(queue, shingles, begin(kshings[index]), end(kshings[index]));
         }
-
+    }
+    catch (cl::Error err) {
+        std::cout << "Exception\n";
+        std::cerr
+            << "ERROR: "
+            << err.what()
+            << "("
+            << err_code(err.err())
+            << ")"
+            << std::endl;
     }
 
-
+    // for (int index=0; index<ndocs; index++){
+    //     vector<char> kshingle(k);
+    //
+    //     for (int i = 0; i < k; i++) {
+    //         kshingle[i] = docs[index][i];
+    //     }
+    //
+    //     string srt(kshingle.begin(), kshingle.end());
+    //     kshings[index].push_back(srt);
+    //
+    //     for (int i = k; i < docs[index].size(); i++) {
+    //         kshingle.erase(kshingle.begin());
+    //         kshingle.push_back(docs[index][i]);
+    //         string srt(kshingle.begin(), kshingle.end());
+    //         kshings[index].push_back(srt);
+    //     }
+    // }
 }
 
 void Characteristic_Matrix::computeCM() {

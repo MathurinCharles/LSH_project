@@ -63,7 +63,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
 }
@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
     util::Timer timer;
     Characteristic_Matrix cm(k,docs);
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-    printf("---------------------------------------------------------\n");
-    printf("creation of charac matrix ran in %lf seconds\n", rtime);
+    // printf("---------------------------------------------------------\n");
+    // printf("creation of charac matrix ran in %lf seconds\n", rtime);
     CM = cm.getCM();
     timer.reset();
     writeSimilarity();
