@@ -23,15 +23,9 @@ private:
     int ndocs;
     vector<vector<char> > docs;
     vector< vector<string> >kshings;
-    vector <map<int, int> >buckets;
-    map<int, int> universal_kshingles;
     vector<vector <bool> > CM;
 
     void generateKShingles();
-
-    void hashShingles();
-
-    void generateUniversal();
 
     void computeCM();
 
