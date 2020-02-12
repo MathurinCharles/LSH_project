@@ -75,6 +75,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
+            // cout << x << ", " << x+y << endl;
             cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
@@ -132,7 +133,6 @@ void writeSimilarity() {
     //
     //     // Create the kernel functor
     //     auto write_sim = cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>(program, "write_sim");
-    //     vector <int> test;
     //     for (int i = 0; i < CM.size(); i++) {
     //         for (int j = i+1; j < CM.size(); j++) {
     //             buf_doc1 = cl::Buffer(context, begin(CM[i]), end(CM[i]), true);

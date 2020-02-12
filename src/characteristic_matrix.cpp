@@ -106,16 +106,25 @@ void Characteristic_Matrix::computeCM() {
 
         // Load in kernel source, creating a program object for the context
         cl::Program program(context, util::loadProgram("src/compute_cm.cl"), true);
+        cl::Program program_bis(context, util::loadProgram("src/clear_buffer.cl"), true);
         // Get the command queue
         cl::CommandQueue queue(context);
 
         // Create the kernel functor
         auto compute_cm = cl::make_kernel<cl::Buffer, cl::Buffer, int, int>(program, "compute_cm");
-
+        auto clear_buffer = cl::make_kernel<cl::Buffer>(program_bis, "clear_buffer");
+        vector <int> test(kshingsize,0);
         for (int index=0; index<ndocs; index++){
             unsigned int n = docs[index].size();
             doc = cl::Buffer(context, begin(docs[index]), end(docs[index]), true);
             cm_row = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int)*kshingsize);
+            clear_buffer(cl::EnqueueArgs(queue, cl::NDRange(CM[index].size())), cm_row);
+            cl::copy(queue, cm_row, begin(test), end(test));
+            cout << "index: " << index << endl;
+            for (int k = 0; k < CM[index].size(); k++) {
+                cout << test[k] << ", ";
+            }
+            cout << endl;
             compute_cm(cl::EnqueueArgs(queue, cl::NDRange(n-(k-1))), doc, cm_row, kshingsize,k);
             queue.finish();
             cl::copy(queue, cm_row, begin(CM[index]), end(CM[index]));
