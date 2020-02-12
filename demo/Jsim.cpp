@@ -55,6 +55,8 @@ void writeSimilarity() {
     double y = 0.0;
     for (int i = 0; i < CM[0].size(); i++) {
         for (int j = i+1; j < CM[0].size(); j++) {
+            x = 0;
+            y = 0;
             for (int k = 0; k < CM.size(); k++) {
               int aux = 0;
               if (CM[k][i]) aux++;
