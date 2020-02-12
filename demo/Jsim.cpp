@@ -58,6 +58,8 @@ void readDocuments(char* argv[]) {
 }
 
 void writeSimilarity() {
+    cout << "size cm: " << CM.size() << endl;
+    cout << "size cm[0]: " << CM[0].size() << endl;
     double x = 0;
     double y = 0;
     for (int i = 0; i < CM.size(); i++) {
@@ -72,7 +74,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
 
