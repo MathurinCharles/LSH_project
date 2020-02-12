@@ -21,9 +21,10 @@ class Characteristic_Matrix {
 private:
     int k;
     int ndocs;
+    int kshingsize;
     vector<vector<char> > docs;
     vector< vector<string> >kshings;
-    vector<vector <bool> > CM;
+    vector<vector <int> > CM;
 
     void generateKShingles();
 
@@ -34,8 +35,8 @@ private:
 public:
 
     Characteristic_Matrix(int k, vector<vector<char> > docs);
-
-    vector<vector<bool> > getCM();
+    vector<vector<int> > getCM();
 
 };
+
 #endif

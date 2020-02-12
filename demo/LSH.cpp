@@ -24,7 +24,7 @@ vector<vector<char> > docs;
 
 map<pair<int,int>, double> candidates;
 
-vector<vector <bool> > CM;
+vector<vector <int> > CM;
 vector<vector<int> > SM;
 
 

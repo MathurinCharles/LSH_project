@@ -1,19 +1,28 @@
+#define __CL_ENABLE_EXCEPTIONS
+
+#include "cl.hpp"
+#include "util.hpp" // utility library
+#include "device_picker.hpp"
+#include "err_code.h"
+
 #include<iostream>
 #include<vector>
 #include<string>
 #include<fstream>
-#include"characteristic_matrix.h"
+#include"../src/characteristic_matrix.h"
 #include <boost/filesystem.hpp>
+
+// pick up device type from compiler command line or from the default type
+#ifndef DEVICE
+#define DEVICE CL_DEVICE_TYPE_CPU
+#endif
 
 using namespace std;
 using namespace boost::filesystem;
 
-#include "util.hpp" // utility library
-
-
 int k = 5;
 
-vector<vector <bool> > CM;
+vector<vector <int> > CM;
 vector<vector<char> > docs;
 vector<string> docs_names;
 
@@ -49,37 +58,117 @@ void readDocuments(char* argv[]) {
 }
 
 void writeSimilarity() {
-    //write on the screen the Jaccard similarity from the caracteristic matrix.
-    // printf("---------------------------------------------------------\n");
-    double x = 0.0;
-    double y = 0.0;
-    for (int i = 0; i < CM[0].size(); i++) {
-        for (int j = i+1; j < CM[0].size(); j++) {
-            for (int k = 0; k < CM.size(); k++) {
+    double x = 0;
+    double y = 0;
+    for (int i = 0; i < CM.size(); i++) {
+        for (int j = i+1; j < CM.size(); j++) {
+            x = 0;
+            y = 0;
+            for (int k = 0; k < CM[i].size(); k++) {
               int aux = 0;
-              if (CM[k][i]) aux++;
-              if (CM[k][j]) aux++;
+              if (CM[i][k]) aux++;
+              if (CM[j][k]) aux++;
               if (aux == 2) x++;
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
+
+    // double inter = 0.0;
+    // double uni = 0.0;
+    // for (int i = 0; i < CM.size(); i++) {
+    //     for (int j = i+1; j < CM.size(); j++) {
+    //         inter = 0.0;
+    //         uni = 0.0;
+    //         for (int k = 0; k < CM[i].size(); k++) {
+    //           prod = CM[i][k]*CM[j][k];
+    //           sum = CM[i][k]+CM[j][k];
+    //           inter += prod;
+    //           uni += sum - prod;
+    //         }
+    //         double jSim = inter/uni;
+    //         cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+    //     }
+    // }
+
+    // cl::Buffer doc1;
+    // cl::Buffer doc2;
+    // cl::Buffer inter_union;
+    // vector <int> inter_uni(2,0);
+    // try
+    // {
+    //     cl_uint deviceIndex = 0;
+    //     // parseArguments(argc, argv, &deviceIndex);
+    //     // Get list of devices
+    //     std::vector<cl::Device> devices;
+    //     unsigned numDevices = getDeviceList(devices);
+    //     // Check device index in range
+    //     if (deviceIndex >= numDevices)
+    //     {
+    //         std::cout << "Invalid device index (try '--list')\n";
+    //         throw 1;
+    //     }
+    //     cl::Device device = devices[deviceIndex];
+    //
+    //     std::string name;
+    //     getDeviceName(device, name);
+    //     std::cout << "\nUsing OpenCL device: " << name << "\n";
+    //
+    //     std::vector<cl::Device> chosen_device;
+    //     chosen_device.push_back(device);
+    //     cl::Context context(chosen_device);
+    //
+    //     // Load in kernel source, creating a program object for the context
+    //     std::cout << 1 << std::endl;
+    //     cl::Program program(context, util::loadProgram("demo/write_sim.cl"), true);
+    //     std::cout << 2 << std::endl;
+    //     // Get the command queue
+    //     cl::CommandQueue queue(context);
+    //
+    //     // Create the kernel functor
+    //     auto write_sim = cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer>(program, "write_sim");
+    //
+    //     for (int i = 0; i < CM.size(); i++) {
+    //         for (int j = i+1; j < CM.size(); j++) {
+    //             inter_uni[0] = 0;
+    //             inter_uni[1] = 0;
+    //             doc1 = cl::Buffer(context, begin(CM[i]), end(CM[i]), true);
+    //             doc2 = cl::Buffer(context, begin(CM[j]), end(CM[j]), true);
+    //             std::cout << 1 << std::endl;
+    //             // inter_union = cl::Buffer(context, begin(inter_uni), end(inter_uni), true);
+    //             inter_union = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int)*2);
+    //             std::cout << 2 << std::endl;
+    //             write_sim(cl::EnqueueArgs(queue, cl::NDRange(CM[i].size())), doc1, doc2, inter_union );
+    //             std::cout << 3 << std::endl;
+    //             queue.finish();
+    //             cl::copy(queue, inter_union, begin(inter_uni), end(inter_uni));
+    //             double jSim = (float) inter_uni[0]/((float) inter_uni[1]);
+    //             cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+    //         }
+    //     }
+    // }
+    // catch (cl::Error err) {
+    //     std::cout << "Exception\n";
+    //     std::cerr
+    //         << "ERROR: "
+    //         << err.what()
+    //         << "("
+    //         << err_code(err.err())
+    //         << ")"
+    //         << std::endl;
+    // }
 }
 
 int main(int argc, char *argv[]) {
     if (argc != 2 or !is_directory(status(argv[1]))){ cout << "Usage: Parameter must be 1 directory containing at least 2 files to compare" << endl; return 0;}
     iniParams();
     readDocuments(argv);
+    Characteristic_Matrix cm(k,docs);
+    CM = cm.getCM();
     double rtime = 0.0;
     util::Timer timer;
-    Characteristic_Matrix cm(k,docs);
-    rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-    // printf("---------------------------------------------------------\n");
-    // printf("creation of charac matrix ran in %lf seconds\n", rtime);
-    CM = cm.getCM();
-    timer.reset();
     writeSimilarity();
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
     printf("---------------------------------------------------------\n");

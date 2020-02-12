@@ -1,6 +1,6 @@
 #include"minhash_signature.h"
 
-MinHash_Signature::MinHash_Signature(vector<vector<bool> > CM, int N) {
+MinHash_Signature::MinHash_Signature(vector<vector<int> > CM, int N) {
     this->CM = CM;
     this->N = N;
     fullRandoms();

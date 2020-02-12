@@ -1,5 +1,3 @@
-#pragma once
-
 /*--------------------------------------------------------------------
  **
  ** Name:     err_code()
@@ -15,6 +13,9 @@
  **-------------------------------------------------------------------
  */
 
+#ifndef ERR_CODE_
+#define ERR_CODE_
+
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <OpenCL/opencl.h>
 #else
@@ -25,7 +26,7 @@
  #include <cstdio>
 #endif
 
-const char *err_code (cl_int err_in)
+inline const char *err_code (cl_int err_in)
 {
     switch (err_in) {
         case CL_SUCCESS:
@@ -135,7 +136,7 @@ const char *err_code (cl_int err_in)
 }
 
 
-void check_error(cl_int err, const char *operation, char *filename, int line)
+inline void check_error(cl_int err, const char *operation, char *filename, int line)
 {
     if (err != CL_SUCCESS)
     {
@@ -149,3 +150,4 @@ void check_error(cl_int err, const char *operation, char *filename, int line)
 
 #define checkError(E, S) check_error(E,S,__FILE__,__LINE__)
 
+#endif

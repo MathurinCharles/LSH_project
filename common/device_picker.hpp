@@ -9,7 +9,8 @@
  **--------------------------------------------------------------------
  */
 
-#pragma once
+#ifndef DEVICE_PICKER_HPP_
+#define DEVICE_PICKER_HPP_
 
 #include <vector>
 #include <err_code.h>
@@ -18,7 +19,7 @@
 #define MAX_INFO_STRING 256
 
 
-unsigned getDeviceList(std::vector<cl::Device>& devices)
+inline unsigned getDeviceList(std::vector<cl::Device>& devices)
 {
   cl_int err;
 
@@ -38,7 +39,7 @@ unsigned getDeviceList(std::vector<cl::Device>& devices)
   return devices.size();
 }
 
-void getDeviceName(cl::Device& device, std::string& name)
+inline void getDeviceName(cl::Device& device, std::string& name)
 {
   cl_device_info info = CL_DEVICE_NAME;
 
@@ -53,14 +54,14 @@ void getDeviceName(cl::Device& device, std::string& name)
 }
 
 
-int parseUInt(const char *str, cl_uint *output)
+inline int parseUInt(const char *str, cl_uint *output)
 {
   char *next;
   *output = strtoul(str, &next, 10);
   return !strlen(next);
 }
 
-void parseArguments(int argc, char *argv[], cl_uint *deviceIndex)
+inline void parseArguments(int argc, char *argv[], cl_uint *deviceIndex)
 {
   for (int i = 1; i < argc; i++)
   {
@@ -110,3 +111,4 @@ void parseArguments(int argc, char *argv[], cl_uint *deviceIndex)
   }
 }
 
+#endif

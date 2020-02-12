@@ -1,3 +1,6 @@
+#ifndef MINHASH_SIGNATURE_H
+#define MINHASH_SIGNATURE_H
+
 #include<vector>
 #include<map>
 #include<string>
@@ -15,7 +18,7 @@ private:
 
     int N;
 
-    vector<vector <bool> > CM;
+    vector<vector <int> > CM;
     vector<vector<int> > SM;
 
     vector<int> coefs;  //ith position stores Coeficient  of ith hash function.
@@ -34,8 +37,10 @@ void computeSM();
 
 public:
 
-MinHash_Signature(vector<vector<bool> >CM, int N);
+MinHash_Signature(vector<vector<int> >CM, int N);
 
 vector<vector<int> > getSM();
 
 };
+
+#endif

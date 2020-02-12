@@ -1,3 +1,5 @@
+#ifndef WTIME_C_
+#define WTIME_C_
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -22,4 +24,4 @@ double wtime()
 #endif
 }
 
-
+#endif

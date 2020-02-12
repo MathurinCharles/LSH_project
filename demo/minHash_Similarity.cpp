@@ -18,7 +18,7 @@ vector<string> docs_names;
 
 vector<vector<char> > docs;
 
-vector<vector <bool> > CM;
+vector<vector <int> > CM;
 vector<vector<int> > SM;
 
 vector<int> coefs;  //ith position stores Coefficient  of ith hash function.

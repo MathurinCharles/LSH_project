@@ -18,28 +18,68 @@ Characteristic_Matrix::Characteristic_Matrix(int k, vector<vector<char> > docs) 
     ndocs = docs.size();
     double rtime = 0.0;
     util::Timer timer;
-    generateKShingles();
-    rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-    printf("---------------------------------------------------------\n");
-    printf("generateKShingles ran in %lf seconds\n", rtime);
-    timer.reset();
+    // generateKShingles();
+    // rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
+    // printf("---------------------------------------------------------\n");
+    // printf("generateKShingles ran in %lf seconds\n", rtime);
+    // timer.reset();
     computeCM();
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
     printf("---------------------------------------------------------\n");
     printf("computeCM ran in %lf seconds\n", rtime);
-    timer.reset();
 }
 
-vector<vector<bool> > Characteristic_Matrix::getCM() {
+vector<vector<int> > Characteristic_Matrix::getCM() {
     return CM;
 }
 
 void Characteristic_Matrix::generateKShingles() {
     //Generate the k-shingles of the two documents
-    kshings = vector<vector<string> > (ndocs);
 
-    cl::Buffer doc;                        // device memory used for the input  document vector
-    cl::Buffer shingles;                       // device memory used for the output shingles vector
+    // for (int index=0; index<ndocs; index++){
+    //     vector<char> kshingle(k);
+    //    timer.reset();
+    //     for (int i = 0; i < k; i++) {
+    //         kshingle[i] = docs[index][i];
+    //     }
+    //
+    //     string srt(kshingle.begin(), kshingle.end());
+    //     kshings[index].push_back(srt);
+    //
+    //     for (int i = k; i < docs[index].size(); i++) {
+    //         kshingle.erase(kshingle.begin());
+    //         kshingle.push_back(docs[index][i]);
+    //         string srt(kshingle.begin(), kshingle.end());
+    //         kshings[index].push_back(srt);
+    //     }
+    // }
+}
+
+void Characteristic_Matrix::computeCM() {
+    //Calculation of the Characteristic Matrix
+
+    // hash<string> h;
+    // int kshingsize = kshings[0].size();
+    // for (int index=1; index<ndocs; index++){
+    //    if (kshings[index].size() > kshingsize) kshingsize = kshings[index].size();
+    // }
+    // CM= vector<vector <int> >(kshingsize, vector<int> (ndocs,0));
+    // for (int index=0; index<ndocs; index++){
+    //     for (int i = 0; i < kshings[index].size(); i++) {
+    //         CM[h(kshings[index][i]) % kshingsize][index] = 1;
+    //     }
+    // }
+
+    int kshingsize = docs[0].size();
+    for (int index=1; index<ndocs; index++){
+       if (docs[index].size() > kshingsize) kshingsize = docs[index].size();
+    }
+    kshingsize = kshingsize -(k-1);
+    cout << "kshingsize init: " << kshingsize << endl;
+    kshings = vector<vector<string> > (ndocs);
+    CM = vector<vector <int> >(ndocs, vector<int> (kshingsize,0));
+    cl::Buffer doc;                        // device memory used for the input document vector
+    cl::Buffer cm_row;
 
     try
     {
@@ -65,24 +105,20 @@ void Characteristic_Matrix::generateKShingles() {
         cl::Context context(chosen_device);
 
         // Load in kernel source, creating a program object for the context
-        std::cout << 1 << std::endl;
-        cl::Program program(context, util::loadProgram("src/generate_shingles.cl"), true);
-        std::cout << 2 << std::endl;
+        cl::Program program(context, util::loadProgram("src/compute_cm.cl"), true);
         // Get the command queue
         cl::CommandQueue queue(context);
 
         // Create the kernel functor
-        auto generate_shingles = cl::make_kernel<cl::Buffer, cl::Buffer, int>(program, "generate_shingles");
+        auto compute_cm = cl::make_kernel<cl::Buffer, cl::Buffer, int, int>(program, "compute_cm");
 
         for (int index=0; index<ndocs; index++){
             unsigned int n = docs[index].size();
             doc = cl::Buffer(context, begin(docs[index]), end(docs[index]), true);
-            shingles = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(char)*k*(n-(k-1)));
-            std::cout << index << std::endl;
-            generate_shingles(cl::EnqueueArgs(queue, cl::NDRange(n-(k-1))), doc, shingles,k);
-            printf("reussi");
+            cm_row = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(int)*kshingsize);
+            compute_cm(cl::EnqueueArgs(queue, cl::NDRange(n-(k-1))), doc, cm_row, kshingsize,k);
             queue.finish();
-            cl::copy(queue, shingles, begin(kshings[index]), end(kshings[index]));
+            cl::copy(queue, cm_row, begin(CM[index]), end(CM[index]));
         }
     }
     catch (cl::Error err) {
@@ -94,38 +130,5 @@ void Characteristic_Matrix::generateKShingles() {
             << err_code(err.err())
             << ")"
             << std::endl;
-    }
-
-    // for (int index=0; index<ndocs; index++){
-    //     vector<char> kshingle(k);
-    //
-    //     for (int i = 0; i < k; i++) {
-    //         kshingle[i] = docs[index][i];
-    //     }
-    //
-    //     string srt(kshingle.begin(), kshingle.end());
-    //     kshings[index].push_back(srt);
-    //
-    //     for (int i = k; i < docs[index].size(); i++) {
-    //         kshingle.erase(kshingle.begin());
-    //         kshingle.push_back(docs[index][i]);
-    //         string srt(kshingle.begin(), kshingle.end());
-    //         kshings[index].push_back(srt);
-    //     }
-    // }
-}
-
-void Characteristic_Matrix::computeCM() {
-    //Calculation of the Characteristic Matrix
-    hash<string> h;
-    int kshingsize = kshings[0].size();
-    for (int index=1; index<ndocs; index++){
-       if (kshings[index].size() > kshingsize) kshingsize = kshings[index].size();
-    }
-    CM= vector<vector <bool> >(kshingsize, vector<bool> (ndocs,false));
-    for (int index=0; index<ndocs; index++){
-        for (int i = 0; i < kshings[index].size(); i++) {
-            CM[h(kshings[index][i]) % kshingsize][index] = true;
-        }
     }
 }
