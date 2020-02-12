@@ -14,11 +14,12 @@
 __kernel void write_sim(
     __global int* doc1,
     __global int* doc2,
-    __global int* inter_union)
+    __global int* inter,
+    __global int* uni)
 {
   int i = get_global_id(0);
   int prod = doc1[i]*doc2[i];
   int sum = doc1[i]+doc2[i];
-  inter_union[0] = inter_union[0] + prod;
-  inter_union[1] = inter_union[1] + sum - prod;
+  inter[i] = prod;
+  uni[i] = sum - prod;
 }
