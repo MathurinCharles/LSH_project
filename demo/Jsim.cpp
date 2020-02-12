@@ -60,23 +60,23 @@ void readDocuments(char* argv[]) {
 void writeSimilarity() {
     cout << "size cm: " << CM.size() << endl;
     cout << "size cm[0]: " << CM[0].size() << endl;
-    double x = 0;
-    double y = 0;
-    for (int i = 0; i < CM.size(); i++) {
-        for (int j = i+1; j < CM.size(); j++) {
-            x = 0;
-            y = 0;
-            for (int k = 0; k < CM[i].size(); k++) {
-              int aux = 0;
-              if (CM[i][k]) aux++;
-              if (CM[j][k]) aux++;
-              if (aux == 2) x++;
-              if (aux == 1) y++;
-            }
-            double jSim = x/(x+y);
-            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
-        }
-    }
+    // double x = 0;
+    // double y = 0;
+    // for (int i = 0; i < CM.size(); i++) {
+    //     for (int j = i+1; j < CM.size(); j++) {
+    //         x = 0;
+    //         y = 0;
+    //         for (int k = 0; k < CM[i].size(); k++) {
+    //           int aux = 0;
+    //           if (CM[i][k]) aux++;
+    //           if (CM[j][k]) aux++;
+    //           if (aux == 2) x++;
+    //           if (aux == 1) y++;
+    //         }
+    //         double jSim = x/(x+y);
+    //         // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+    //     }
+    // }
 
     // double inter = 0.0;
     // double uni = 0.0;
@@ -95,72 +95,66 @@ void writeSimilarity() {
     //     }
     // }
 
-    // cl::Buffer doc1;
-    // cl::Buffer doc2;
-    // cl::Buffer inter_union;
-    // vector <int> inter_uni(2,0);
-    // try
-    // {
-    //     cl_uint deviceIndex = 0;
-    //     // parseArguments(argc, argv, &deviceIndex);
-    //     // Get list of devices
-    //     std::vector<cl::Device> devices;
-    //     unsigned numDevices = getDeviceList(devices);
-    //     // Check device index in range
-    //     if (deviceIndex >= numDevices)
-    //     {
-    //         std::cout << "Invalid device index (try '--list')\n";
-    //         throw 1;
-    //     }
-    //     cl::Device device = devices[deviceIndex];
-    //
-    //     std::string name;
-    //     getDeviceName(device, name);
-    //     std::cout << "\nUsing OpenCL device: " << name << "\n";
-    //
-    //     std::vector<cl::Device> chosen_device;
-    //     chosen_device.push_back(device);
-    //     cl::Context context(chosen_device);
-    //
-    //     // Load in kernel source, creating a program object for the context
-    //     std::cout << 1 << std::endl;
-    //     cl::Program program(context, util::loadProgram("demo/write_sim.cl"), true);
-    //     std::cout << 2 << std::endl;
-    //     // Get the command queue
-    //     cl::CommandQueue queue(context);
-    //
-    //     // Create the kernel functor
-    //     auto write_sim = cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer>(program, "write_sim");
-    //
-    //     for (int i = 0; i < CM.size(); i++) {
-    //         for (int j = i+1; j < CM.size(); j++) {
-    //             inter_uni[0] = 0;
-    //             inter_uni[1] = 0;
-    //             doc1 = cl::Buffer(context, begin(CM[i]), end(CM[i]), true);
-    //             doc2 = cl::Buffer(context, begin(CM[j]), end(CM[j]), true);
-    //             std::cout << 1 << std::endl;
-    //             // inter_union = cl::Buffer(context, begin(inter_uni), end(inter_uni), true);
-    //             inter_union = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int)*2);
-    //             std::cout << 2 << std::endl;
-    //             write_sim(cl::EnqueueArgs(queue, cl::NDRange(CM[i].size())), doc1, doc2, inter_union );
-    //             std::cout << 3 << std::endl;
-    //             queue.finish();
-    //             cl::copy(queue, inter_union, begin(inter_uni), end(inter_uni));
-    //             double jSim = (float) inter_uni[0]/((float) inter_uni[1]);
-    //             cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
-    //         }
-    //     }
-    // }
-    // catch (cl::Error err) {
-    //     std::cout << "Exception\n";
-    //     std::cerr
-    //         << "ERROR: "
-    //         << err.what()
-    //         << "("
-    //         << err_code(err.err())
-    //         << ")"
-    //         << std::endl;
-    // }
+    cl::Buffer doc1;
+    cl::Buffer doc2;
+    cl::Buffer inter_union;
+    vector <int> inter_uni(2,0);
+    try
+    {
+        cl_uint deviceIndex = 0;
+        // parseArguments(argc, argv, &deviceIndex);
+        // Get list of devices
+        std::vector<cl::Device> devices;
+        unsigned numDevices = getDeviceList(devices);
+        // Check device index in range
+        if (deviceIndex >= numDevices)
+        {
+            std::cout << "Invalid device index (try '--list')\n";
+            throw 1;
+        }
+        cl::Device device = devices[deviceIndex];
+
+        std::string name;
+        getDeviceName(device, name);
+        std::cout << "\nUsing OpenCL device: " << name << "\n";
+
+        std::vector<cl::Device> chosen_device;
+        chosen_device.push_back(device);
+        cl::Context context(chosen_device);
+
+        // Load in kernel source, creating a program object for the context
+        cl::Program program(context, util::loadProgram("demo/write_sim.cl"), true);
+        // Get the command queue
+        cl::CommandQueue queue(context);
+
+        // Create the kernel functor
+        auto write_sim = cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer>(program, "write_sim");
+
+        for (int i = 0; i < CM.size(); i++) {
+            for (int j = i+1; j < CM.size(); j++) {
+                inter_uni[0] = 0;
+                inter_uni[1] = 0;
+                doc1 = cl::Buffer(context, begin(CM[i]), end(CM[i]), true);
+                doc2 = cl::Buffer(context, begin(CM[j]), end(CM[j]), true);
+                inter_union = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int)*2);
+                write_sim(cl::EnqueueArgs(queue, cl::NDRange(CM[i].size())), doc1, doc2, inter_union);
+                queue.finish();
+                cl::copy(queue, inter_union, begin(inter_uni), end(inter_uni));
+                double jSim = (float) inter_uni[0]/((float) inter_uni[1]);
+                cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            }
+        }
+    }
+    catch (cl::Error err) {
+        std::cout << "Exception\n";
+        std::cerr
+            << "ERROR: "
+            << err.what()
+            << "("
+            << err_code(err.err())
+            << ")"
+            << std::endl;
+    }
 }
 
 int main(int argc, char *argv[]) {

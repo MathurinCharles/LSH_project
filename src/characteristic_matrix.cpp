@@ -120,6 +120,10 @@ void Characteristic_Matrix::computeCM() {
             queue.finish();
             cl::copy(queue, cm_row, begin(CM[index]), end(CM[index]));
         }
+        // for (int k = 0; k < CM[0].size(); k++) {
+        //   cout << CM[0][k] << ", " ;
+        // }
+        // cout << endl;
     }
     catch (cl::Error err) {
         std::cout << "Exception\n";
