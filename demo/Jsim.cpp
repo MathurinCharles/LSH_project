@@ -65,8 +65,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            cout << x << ", " << x+y << endl;
-            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
 }
@@ -74,13 +73,13 @@ void writeSimilarity() {
 int main(int argc, char *argv[]) {
     if (argc != 2 or !is_directory(status(argv[1]))){ cout << "Usage: Parameter must be 1 directory containing at least 2 files to compare" << endl; return 0;}
     iniParams();
-    readDocuments(argv);
     double rtime = 0.0;
     util::Timer timer;
-    Characteristic_Matrix cm(k,docs);
+    readDocuments(argv);
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-    // printf("---------------------------------------------------------\n");
-    // printf("creation of charac matrix ran in %lf seconds\n", rtime);
+    printf("---------------------------------------------------------\n");
+    printf("read documents ran in %lf seconds\n", rtime);
+    Characteristic_Matrix cm(k,docs);
     CM = cm.getCM();
     timer.reset();
     writeSimilarity();

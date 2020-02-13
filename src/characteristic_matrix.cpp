@@ -27,7 +27,6 @@ Characteristic_Matrix::Characteristic_Matrix(int k, vector<vector<char> > docs) 
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
     printf("---------------------------------------------------------\n");
     printf("computeCM ran in %lf seconds\n", rtime);
-    timer.reset();
 }
 
 vector<vector<bool> > Characteristic_Matrix::getCM() {
