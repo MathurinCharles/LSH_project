@@ -86,4 +86,5 @@ int main(int argc, char *argv[]) {
     rtime = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
     printf("---------------------------------------------------------\n");
     printf("writeSimilarity ran in %lf seconds\n", rtime);
+    printf("---------------------------------------------------------\n");
 }
