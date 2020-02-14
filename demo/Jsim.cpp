@@ -65,7 +65,7 @@ void writeSimilarity() {
               if (aux == 1) y++;
             }
             double jSim = x/(x+y);
-            // cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
+            cout << "Jaccard similarity(" << docs_names[i] << ", " << docs_names[j] << ") = " << jSim << endl;
         }
     }
 }
